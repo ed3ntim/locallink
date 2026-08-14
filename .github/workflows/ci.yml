@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+# Laeuft auf Linux: baut den geteilten Kern + JVM- und Android-Ziel und faehrt
+# beide Testsuiten. Der iOS-Zweig (macOS-Runner) kommt spaeter dazu.
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Android-SDK
+        uses: android-actions/setup-android@v3
+
+      - name: SDK-Pakete
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: gradlew ausfuehrbar machen
+        run: chmod +x gradlew
+
+      - name: JS-Referenz (23 Tests)
+        working-directory: reference
+        run: node test/run.mjs
+
+      - name: Kotlin JVM-Tests (31 Tests)
+        run: ./gradlew jvmTest --stacktrace
+
+      - name: Android - Unit-Tests und AAR
+        run: ./gradlew testDebugUnitTest assemble --stacktrace
+
+      - name: Testberichte sichern
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: build/reports/tests/
+          if-no-files-found: ignore

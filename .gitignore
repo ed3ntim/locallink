@@ -5,6 +5,10 @@ build/
 .kotlin/
 # Der Wrapper (gradlew, gradlew.bat, gradle/wrapper/*) wird bewusst versioniert.
 
+# --- Android ---
+local.properties
+*.aar
+
 # --- Node (reference/) ---
 node_modules/
 npm-debug.log*
