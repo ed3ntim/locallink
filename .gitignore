@@ -1,0 +1,14 @@
+# Node
+node_modules/
+npm-debug.log*
+.npm/
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Hinweis: vectors.json wird bewusst versioniert - es ist die Referenzvorlage
+# fuer die Kotlin- und Swift-Ports, kein Wegwerf-Artefakt.

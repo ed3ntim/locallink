@@ -1,0 +1,219 @@
+{
+  "protokoll": 1,
+  "erzeugt": "tools/vectors.mjs",
+  "faelle": [
+    {
+      "name": "leeres-paket-ohne-flags",
+      "zweck": "Kleinstes gueltiges Paket. Prueft den nackten Kopf.",
+      "eingabe": {
+        "header": {
+          "seq": 0,
+          "ack": 0,
+          "ackBits": 0,
+          "sendTimeUs": null,
+          "hasAck": false
+        },
+        "messages": []
+      },
+      "erwartet": "400000000000000000",
+      "laenge": 9
+    },
+    {
+      "name": "nur-bestaetigung",
+      "zweck": "Reines Ack-Paket, wie es ein ruhiger Kanal schickt.",
+      "eingabe": {
+        "header": {
+          "seq": 7,
+          "ack": 5,
+          "ackBits": 15,
+          "hasAck": true,
+          "ackDelayUs": 3200,
+          "sendTimeUs": null
+        },
+        "messages": []
+      },
+      "erwartet": "42000700050000000f0032",
+      "laenge": 11
+    },
+    {
+      "name": "zustand-sequenced",
+      "zweck": "Ein Schnappschuss, wie ihn ein Echtzeitspiel 30-mal je Sekunde sendet.",
+      "eingabe": {
+        "header": {
+          "seq": 1024,
+          "ack": 1020,
+          "ackBits": 4294967295,
+          "hasAck": true,
+          "ackDelayUs": 0,
+          "sendTimeUs": 1000000
+        },
+        "messages": [
+          {
+            "mode": 1,
+            "channel": 3,
+            "msgSeq": 900,
+            "fragIndex": null,
+            "fragCount": null,
+            "payload": "0102030405060708"
+          }
+        ]
+      },
+      "erwartet": "43040003fcffffffff0000000f424013038400080102030405060708",
+      "laenge": 28
+    },
+    {
+      "name": "salvo-schuss",
+      "zweck": "Ein Spielzug auf dem Ereigniskanal.",
+      "eingabe": {
+        "header": {
+          "seq": 42,
+          "ack": 41,
+          "ackBits": 1,
+          "hasAck": true,
+          "ackDelayUs": 12800,
+          "sendTimeUs": 987654
+        },
+        "messages": [
+          {
+            "mode": 3,
+            "channel": 2,
+            "msgSeq": 17,
+            "fragIndex": null,
+            "fragCount": null,
+            "payload": "6665756572206234"
+          }
+        ]
+      },
+      "erwartet": "43002a00290000000100c8000f120632001100086665756572206234",
+      "laenge": 28
+    },
+    {
+      "name": "mehrere-kanaele-in-einem-paket",
+      "zweck": "Buendelung. Prueft, dass Nachrichten hintereinander korrekt gelesen werden.",
+      "eingabe": {
+        "header": {
+          "seq": 300,
+          "ack": 299,
+          "ackBits": 3,
+          "hasAck": true,
+          "ackDelayUs": 64,
+          "sendTimeUs": 55555
+        },
+        "messages": [
+          {
+            "mode": 3,
+            "channel": 0,
+            "msgSeq": 2,
+            "fragIndex": null,
+            "fragCount": null,
+            "payload": "63617073"
+          },
+          {
+            "mode": 0,
+            "channel": 1,
+            "msgSeq": 3,
+            "fragIndex": null,
+            "fragCount": null,
+            "payload": "aa"
+          },
+          {
+            "mode": 2,
+            "channel": 2,
+            "msgSeq": 4,
+            "fragIndex": null,
+            "fragCount": null,
+            "payload": "65726569676e6973"
+          },
+          {
+            "mode": 1,
+            "channel": 3,
+            "msgSeq": 5,
+            "fragIndex": null,
+            "fragCount": null,
+            "payload": "00000001"
+          }
+        ]
+      },
+      "erwartet": "43012c012b0000000300010000d9033000020004636170730100030001aa220004000865726569676e6973130005000400000001",
+      "laenge": 52
+    },
+    {
+      "name": "fragment-mitte",
+      "zweck": "Ein Teilstueck einer grossen Nachricht.",
+      "eingabe": {
+        "header": {
+          "seq": 8,
+          "ack": 7,
+          "ackBits": 0,
+          "hasAck": true,
+          "ackDelayUs": 0,
+          "sendTimeUs": 4242
+        },
+        "messages": [
+          {
+            "mode": 3,
+            "channel": 2,
+            "msgSeq": 99,
+            "fragIndex": 3,
+            "fragCount": 12,
+            "payload": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd"
+          }
+        ]
+      },
+      "erwartet": "430008000700000000000000001092320063010003000c10cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+      "laenge": 40
+    },
+    {
+      "name": "laenge-ueber-127",
+      "zweck": "Nutzlast jenseits der Ein-Byte-Grenze des varint.",
+      "eingabe": {
+        "header": {
+          "seq": 1,
+          "ack": 0,
+          "ackBits": 0,
+          "hasAck": true,
+          "ackDelayUs": 0,
+          "sendTimeUs": 1
+        },
+        "messages": [
+          {
+            "mode": 3,
+            "channel": 2,
+            "msgSeq": 1,
+            "fragIndex": null,
+            "fragCount": null,
+            "payload": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a"
+          }
+        ]
+      },
+      "erwartet": "43000100000000000000000000000132000100c8015a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "laenge": 221
+    },
+    {
+      "name": "sequenznummern-am-ueberlauf",
+      "zweck": "Nummern kurz vor dem Umschlag von 65535 auf 0.",
+      "eingabe": {
+        "header": {
+          "seq": 65535,
+          "ack": 65534,
+          "ackBits": 2147483648,
+          "hasAck": true,
+          "ackDelayUs": 4194240,
+          "sendTimeUs": 4294967295
+        },
+        "messages": [
+          {
+            "mode": 3,
+            "channel": 2,
+            "msgSeq": 65535,
+            "fragIndex": null,
+            "fragCount": null,
+            "payload": "72616e64"
+          }
+        ]
+      },
+      "erwartet": "43fffffffe80000000ffffffffffff32ffff000472616e64",
+      "laenge": 24
+    }
+  ]
+}

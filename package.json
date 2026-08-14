@@ -1,0 +1,12 @@
+{
+  "name": "locallink-reference",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Ausfuehrbare Referenzimplementierung des LocalLink-Protokolls. Dient als geprueftes Vorbild fuer die Kotlin-Multiplatform-Bibliothek.",
+  "scripts": {
+    "test": "node test/run.mjs",
+    "bench": "node bench/run.mjs",
+    "vectors": "node tools/vectors.mjs"
+  }
+}
