@@ -1,14 +1,21 @@
-# Node
+# --- Kotlin / Gradle ---
+.gradle/
+build/
+**/build/
+.kotlin/
+# Der Wrapper (gradlew, gradlew.bat, gradle/wrapper/*) wird bewusst versioniert.
+
+# --- Node (reference/) ---
 node_modules/
 npm-debug.log*
 .npm/
 
-# Editor / OS
+# --- Editor / OS ---
 .DS_Store
 Thumbs.db
 .idea/
 .vscode/
 *.swp
 
-# Hinweis: vectors.json wird bewusst versioniert - es ist die Referenzvorlage
-# fuer die Kotlin- und Swift-Ports, kein Wegwerf-Artefakt.
+# Hinweis: reference/vectors.json wird bewusst versioniert - es ist die
+# Referenzvorlage fuer den Kotlin- und Swift-Port, kein Wegwerf-Artefakt.

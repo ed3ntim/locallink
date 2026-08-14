@@ -1,20 +1,36 @@
-# LocalLink — Referenzimplementierung
+# LocalLink
 
-Ausführbares Vorbild für die Verbindungsschicht aus dem Salvo-Konzept. Kein
-Produktcode: Diese Fassung existiert, damit die Algorithmen **vor** dem Port
-nach Kotlin Multiplatform belegt sind statt vermutet.
+Wiederverwendbare Nahbereichs-Verbindungsschicht (BLE / WLAN, plattform­übergreifend
+iOS ↔ Android) aus dem Salvo-Konzept. Muss auch reaktionsintensive Spiele tragen,
+nicht nur rundenbasierte.
 
-Warum überhaupt: Weder der iOS-Simulator noch der Android-Emulator können
+Das Repo hat zwei Ebenen:
+
+- **Wurzel** — die eigentliche Bibliothek als **Kotlin Multiplatform**. Der
+  gesamte Protokollkern liegt in `src/commonMain` (reines Kotlin, keine
+  Plattform-APIs); BLE- und WLAN-Transporte kommen später je Plattform dazu.
+- **`reference/`** — die ausführbare **JS-Referenz**, an der die Algorithmen
+  zuerst belegt wurden. Sie bleibt als lesbares Vorbild und als Quelle der
+  Drahtformat-Referenzdaten (`reference/vectors.json`) erhalten.
+
+Warum die Referenz: Weder der iOS-Simulator noch der Android-Emulator können
 Bluetooth. Ein Protokoll, das nur auf echten Geräten läuft, wird faktisch nie
-automatisch getestet. Diese Referenz löst das mit virtueller Uhr und
-simuliertem Transport — 23 Protokolltests laufen in unter einer Sekunde,
-vollständig ohne Hardware.
+automatisch getestet. Beide Ebenen lösen das mit virtueller Uhr und simuliertem
+Transport — die Tests laufen vollständig ohne Hardware.
 
 ```
-node test/run.mjs        # 23 Tests
-node bench/run.mjs       # Messläufe über fünf Transportprofile
-node tools/vectors.mjs   # Referenzdaten fürs Drahtformat -> vectors.json
+./gradlew jvmTest              # Kotlin: 31 Tests (Kern + Golden-Vektoren)
+
+cd reference
+node test/run.mjs             # JS-Referenz: 23 Tests
+node bench/run.mjs            # Messläufe über fünf Transportprofile
+node tools/vectors.mjs        # erzeugt vectors.json neu
 ```
+
+**Byte-Identität ist geprüft.** `WireVectorsTest` (Kotlin) baut dieselben acht
+Pakete wie die JS-Referenz und vergleicht sie Byte für Byte gegen die erwarteten
+Werte aus `reference/vectors.json`. Damit ist sichergestellt, dass ein iPhone
+und ein Pixel später dasselbe Drahtformat sprechen (Backlog NP-02).
 
 ## Was der Echtzeit-Anspruch am Entwurf geändert hat
 
@@ -175,9 +191,27 @@ ein echtes Spiel den Bedarf gezeigt hat.
 
 | | |
 |---|---|
-| Kern, Kanäle, Zuverlässigkeit, Fragmentierung | fertig, 23 Tests grün |
-| Uhrenabgleich, RTT, Jitter, Sendetaktung | fertig, gemessen |
-| Simulationstransport mit Störungsinjektion | fertig |
-| Referenzdaten fürs Drahtformat | fertig, 8 Fälle |
-| Kotlin-Multiplatform-Port | offen |
+| JS-Referenz (Kern, Zeit, Sim, Vektoren) | fertig, 23 Tests grün |
+| **Kotlin-Multiplatform-Port** | **fertig, 31 Tests grün (JVM-Ziel)** |
+| Drahtformat byte-identisch JS ↔ Kotlin | geprüft, 8 Golden-Vektoren |
+| Uhrenabgleich, RTT, Jitter, Sendetaktung | portiert |
+| Simulationstransport mit Störungsinjektion | portiert |
+| iOS-/Android-/JS-Ziele einhängen | offen — brauchen macOS bzw. SDK/CI |
 | BLE- und UDP-Transport auf echten Geräten | offen — braucht Hardware (P0) |
+
+### Projektstruktur
+
+```
+locallink/
+├── build.gradle.kts, settings.gradle.kts, gradlew…   Kotlin-Multiplatform-Projekt
+├── src/commonMain/kotlin/dev/salvo/locallink/
+│   ├── Wire.kt          Drahtformat: Writer/Reader, encode/decode
+│   ├── Channel.kt       vier Kanalmodi, System-Kanäle
+│   ├── Connection.kt    Kern: Zuverlässigkeit, Fragmentierung, Zeit, Taktung
+│   └── Sim.kt           Simulationstransport, Transportprofile
+├── src/commonTest/kotlin/dev/salvo/locallink/
+│   ├── Harness.kt       zwei Verbindungen über eine simulierte Strecke
+│   ├── WireTest.kt, WireVectorsTest.kt, DeliveryTest.kt,
+│   └── FragmentTest.kt, TimingTest.kt, ResumeTest.kt
+└── reference/           die JS-Referenz (Node) + vectors.json
+```

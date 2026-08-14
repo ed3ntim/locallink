@@ -1,0 +1,7 @@
+# Zeilenenden vereinheitlichen: im Repo LF, damit macOS-/Linux-CI den Wrapper
+# ausfuehren kann. Windows-Batch bleibt CRLF, Binaries bleiben unangetastet.
+* text=auto eol=lf
+*.bat text eol=crlf
+gradlew text eol=lf
+gradle-wrapper.jar binary
+*.jar binary
