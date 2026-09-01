@@ -41,7 +41,10 @@ Bei jeder Weitergabe, auch bei nichtkommerzieller, gilt:
 ## Kontakt
 
 Anfragen zu kommerziellen Lizenzen, Kooperationen oder Beteiligungen:
-über das GitHub-Konto [ed3ntim](https://github.com/ed3ntim).
+
+**contact@ed3n.gallery**
+
+Alternativ über das GitHub-Konto [ed3ntim](https://github.com/ed3ntim).
 
 ## Fremde Bestandteile
 
