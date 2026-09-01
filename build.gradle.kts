@@ -28,6 +28,12 @@ kotlin {
 
     sourceSets {
         val commonMain by getting
+        // Geteilter Quellcode fuer die JVM-nahen Ziele (JVM + Android). Hier
+        // liegt der UDP-Transport: java.net.DatagramSocket gibt es auf beiden,
+        // also kein Grund fuer expect/actual oder Duplikat.
+        val jvmAndroidMain by creating { dependsOn(commonMain) }
+        val jvmMain by getting { dependsOn(jvmAndroidMain) }
+        val androidMain by getting { dependsOn(jvmAndroidMain) }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))

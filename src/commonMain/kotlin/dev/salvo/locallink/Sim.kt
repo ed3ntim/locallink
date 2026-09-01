@@ -134,3 +134,32 @@ class Link(
         p = profile
     }
 }
+
+/**
+ * Ein [PacketTransport] ueber den Simulationstransport - so laesst sich die
+ * transport-agnostische Schicht (etwa NetMatch) deterministisch testen, ganz
+ * ohne echte Sockets. Zwei gekoppelte Enden liefert [simTransportPair]. Das
+ * Fortschreiten der Uhr (und damit die Zustellung) treibt der Aufrufer ueber
+ * die [Sim].
+ */
+class SimTransport internal constructor(override val mtu: Int) : PacketTransport {
+    private val inbox = ArrayDeque<ByteArray>()
+    internal lateinit var link: Link
+
+    internal fun receive(bytes: ByteArray) {
+        inbox.addLast(bytes)
+    }
+
+    override fun send(bytes: ByteArray) = link.send(bytes)
+    override fun poll(): ByteArray? = inbox.removeFirstOrNull()
+    override fun close() {}
+}
+
+/** Zwei ueber [sim] und [profile] gekoppelte [SimTransport]s (A sendet zu B und umgekehrt). */
+fun simTransportPair(sim: Sim, profile: Profile): Pair<SimTransport, SimTransport> {
+    val a = SimTransport(profile.mtu)
+    val b = SimTransport(profile.mtu)
+    a.link = Link(sim, profile) { bytes -> b.receive(bytes) }
+    b.link = Link(sim, profile) { bytes -> a.receive(bytes) }
+    return a to b
+}
